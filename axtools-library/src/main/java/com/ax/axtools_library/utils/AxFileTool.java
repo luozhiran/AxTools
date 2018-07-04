@@ -669,7 +669,7 @@ public class AxFileTool {
             String line;
             int curLine = 1;
             List<String> list = new ArrayList<>();
-            if (AxDataTool.isNullString(charsetName)) {
+            if (AxStatusTool.isNullString(charsetName)) {
                 reader = new BufferedReader(new FileReader(file));
             } else {
                 reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), charsetName));
@@ -711,7 +711,7 @@ public class AxFileTool {
         BufferedReader reader = null;
         try {
             StringBuilder sb = new StringBuilder();
-            if (AxDataTool.isNullString(charsetName)) {
+            if (AxStatusTool.isNullString(charsetName)) {
                 reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             } else {
                 reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), charsetName));
@@ -824,7 +824,7 @@ public class AxFileTool {
      */
     public static String getFileSize(File file) {
         if (!AxStatusTool.isFileExists(file)) return "";
-        return AxDataTool.byte2FitSize(file.length());
+        return AxConvertTool.byte2FitSize(file.length());
     }
 
     /**
@@ -867,7 +867,7 @@ public class AxFileTool {
      * @return filePath最长目录
      */
     public static String getDirName(String filePath) {
-        if (AxDataTool.isNullString(filePath)) return filePath;
+        if (AxStatusTool.isNullString(filePath)) return filePath;
         int lastSep = filePath.lastIndexOf(File.separator);
         return lastSep == -1 ? "" : filePath.substring(0, lastSep + 1);
     }
@@ -890,7 +890,7 @@ public class AxFileTool {
      * @return 文件名
      */
     public static String getFileName(String filePath) {
-        if (AxDataTool.isNullString(filePath)) return filePath;
+        if (AxStatusTool.isNullString(filePath)) return filePath;
         int lastSep = filePath.lastIndexOf(File.separator);
         return lastSep == -1 ? filePath : filePath.substring(lastSep + 1);
     }
@@ -913,7 +913,7 @@ public class AxFileTool {
      * @return 不带拓展名的文件名
      */
     public static String getFileNameNoExtension(String filePath) {
-        if (AxDataTool.isNullString(filePath)) return filePath;
+        if (AxStatusTool.isNullString(filePath)) return filePath;
         int lastPoi = filePath.lastIndexOf('.');
         int lastSep = filePath.lastIndexOf(File.separator);
         if (lastSep == -1) {
@@ -943,7 +943,7 @@ public class AxFileTool {
      * @return 文件拓展名
      */
     public static String getFileExtension(String filePath) {
-        if (AxDataTool.isNullString(filePath)) return filePath;
+        if (AxStatusTool.isNullString(filePath)) return filePath;
         int lastPoi = filePath.lastIndexOf('.');
         int lastSep = filePath.lastIndexOf(File.separator);
         if (lastPoi == -1 || lastSep >= lastPoi) return "";

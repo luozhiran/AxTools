@@ -492,7 +492,7 @@ public class AxTimeTool {
      * @return
      */
     public static String simpleDateFormat(String format, Date date) {
-        if (AxDataTool.isNullString(format)) {
+        if (AxStatusTool.isNullString(format)) {
             format = "yyyy-MM-dd HH:mm:ss";
         }
         String content = new SimpleDateFormat(format).format(date);

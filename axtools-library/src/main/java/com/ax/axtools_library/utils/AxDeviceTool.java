@@ -541,7 +541,7 @@ public class AxDeviceTool {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            AxFileTool.closeIO(lnr, isr);
+            AxCloseIOTool.closeIO(lnr, isr);
         }
         return macAddress == null ? "" : macAddress;
     }
@@ -620,7 +620,7 @@ public class AxDeviceTool {
      * @param phoneNumber 电话号码
      */
     public static void callPhone(final Context context, String phoneNumber) {
-        if (!AxDataTool.isNullString(phoneNumber)) {
+        if (!AxStatusTool.isNullString(phoneNumber)) {
             final String phoneNumber1 = phoneNumber.trim();// 删除字符串首部和尾部的空格
             // 调用系统的拨号服务实现电话拨打功能
             // 封装一个拨打电话的intent，并且将电话号码包装成一个Uri对象传入
@@ -641,9 +641,9 @@ public class AxDeviceTool {
      * @param content     内容
      */
     public static void sendSms(Context context, String phoneNumber, String content) {
-        Uri uri = Uri.parse("smsto:" + (AxDataTool.isNullString(phoneNumber) ? "" : phoneNumber));
+        Uri uri = Uri.parse("smsto:" + (AxStatusTool.isNullString(phoneNumber) ? "" : phoneNumber));
         Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
-        intent.putExtra("sms_body", AxDataTool.isNullString(content) ? "" : content);
+        intent.putExtra("sms_body", AxStatusTool.isNullString(content) ? "" : content);
         context.startActivity(intent);
     }
 
@@ -677,7 +677,7 @@ public class AxDeviceTool {
             // cursor.getString(cursor.getColumnIndex("contact_id"));//getColumnIndex
             // : 查询字段在cursor中索引值,一般都是用在查询字段比较多的时候
             // 判断contact_id是否为空
-            if (!AxDataTool.isNullString(contact_id)) {//null   ""
+            if (!AxStatusTool.isNullString(contact_id)) {//null   ""
                 // 7.根据contact_id查询view_data表中的数据
                 // selection : 查询条件
                 // selectionArgs :查询条件的参数

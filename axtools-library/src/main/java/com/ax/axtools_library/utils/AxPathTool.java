@@ -74,7 +74,7 @@ public class AxPathTool {
      * @return 文件
      */
     public static File getFileByPath(String filePath) {
-        return AxDataTool.isNullString(filePath) ? null : new File(filePath);
+        return AxStatusTool.isNullString(filePath) ? null : new File(filePath);
     }
     /**
      * 获取扩展sd卡路径

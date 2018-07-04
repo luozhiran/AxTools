@@ -124,7 +124,7 @@ public class AxProcessTool {
      * @return {@code true}: 杀死成功<br>{@code false}: 杀死失败
      */
     public static boolean killBackgroundProcesses(Context context, String packageName) {
-        if (AxDataTool.isNullString(packageName)) return false;
+        if (AxStatusTool.isNullString(packageName)) return false;
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningAppProcessInfo> infos = am.getRunningAppProcesses();
         if (infos == null || infos.size() == 0) return true;
