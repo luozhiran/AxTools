@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply plugin: "maven"
 android {
     compileSdkVersion 27
 
@@ -26,18 +26,59 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    compileOnly 'com.android.support:appcompat-v7:27.1.1'
+    compileOnly 'com.android.support.constraint:constraint-layout:1.1.1'
     //流式布局  https://github.com/google/flexbox-layout
-    implementation 'com.google.android:flexbox:1.0.0'
-    implementation 'com.android.support:design:27.1.1'
+    compileOnly 'com.google.android:flexbox:1.0.0'
+    compileOnly 'com.android.support:design:27.1.1'
     //沉浸式 https://github.com/jgilfelt/SystemBarTint
-    implementation 'com.readystatesoftware.systembartint:systembartint:1.0.3'
-    implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
-    implementation 'io.reactivex.rxjava2:rxjava:2.1.14'
+    compileOnly 'com.readystatesoftware.systembartint:systembartint:1.0.3'
+    compileOnly 'com.google.code.gson:gson:2.8.5'
+    compileOnly 'com.squareup.okhttp3:okhttp:3.10.0'
+    compileOnly 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    compileOnly 'io.reactivex.rxjava2:rxjava:2.1.14'
+}
+
+
+
+task makeJar(type:org.gradle.api.tasks.bundling.Jar) {
+    //指定生成的jar名
+    baseName 'ax_tools'
+    //从哪里打包class文件
+    from('build/intermediates/classes/debug/com/ax/axtools')
+    //打包到jar后的目录结构
+    into('com/ax/axtools/')
+    //去掉不需要打包的目录和文件
+    exclude( 'BuildConfig.class', 'R.class')
+    //去掉R$开头的文件
+    exclude{ it.name.startsWith('R$');}
+}
+
+def URL = 'http://localhost:8081/repository/yq/'
+def NAME = 'admin'
+def PASSWARD='admin123'
+def VERSION = '1.0.0'
+def ARTIFACTID='lib-ax'
+def GROUPID='com.ax.axtools_library'
+def PACKAGING='aar'
+def DESCRIPTION='工具库'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: URL) {
+                authentication(userName: NAME, password: PASSWARD)
+            }
+            pom.project {
+                version VERSION
+                artifactId ARTIFACTID
+                groupId GROUPID
+                packaging PACKAGING
+                description DESCRIPTION
+            }
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.ax.axtools_library.utils;
 
 
 import android.util.Log;
+import android.util.Printer;
 
 import com.ax.axtools_library.BuildConfig;
 
@@ -14,8 +15,14 @@ public class L {
     private static int lineNumber;
     private static String LOCAL_SEARCH_LOG = "local_all_log";
 
-    public static boolean isDebuggable() {
-        return BuildConfig.DEBUG;
+    public static boolean isShow = BuildConfig.DEBUG;
+
+    public static void init(boolean show){
+        isShow = show;
+    }
+
+    private static boolean isDebuggable() {
+        return isShow;
     }
 
     private static String createLog(String log) {

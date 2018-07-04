@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
@@ -26,10 +27,13 @@ import com.ax.axtools_library.utils.AxActivityTool;
 import com.ax.axtools_library.utils.AxFileTool;
 import com.ax.axtools_library.utils.AxIntentTool;
 import com.ax.axtools_library.utils.AxPerformanceTool;
+import com.ax.axtools_library.utils.AxTimeTool;
 import com.ax.axtools_library.utils.AxTool;
 import com.ax.axtools_library.utils.L;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.text.SimpleDateFormat;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -43,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @BindView(R.id.play)
     Button play;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,13 +71,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-      if (v == play) {
-//          L.d(AxPerformanceTool.intervalBy());
-//          File file = new File(AxFileTool.getSDCardPath()+"./yqtec/monitor.txt");
-//          L.d(AxPerformanceTool.intervalBy());
-          File file = AxFileTool.getDataFile(this);
-          L.e(file.getAbsolutePath());
-          AxFileTool.writeStringToFile("",file.getAbsolutePath()+"/history.txt");
+        if (v == play) {
+            L.e(AxPerformanceTool.start());
+            File file = new File(AxFileTool.getSDCardPath() + "/.yqtec/lesson_egret_21");
+            File[] files = null;
+            if (file.exists() && file.isDirectory() && file.length() > 0) {
+                files = file.listFiles(new FileFilter() {
+                    @Override
+                    public boolean accept(File pathname) {
+                        if (pathname.isDirectory() && pathname.lastModified() > 7 * 24 * 60 * 60 * 1000) {
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+            for (File file1:files){
+                L.e(file1.getName());
+                AxFileTool.delAllFile(file1.getAbsolutePath());
+            }
+            L.e(AxPerformanceTool.end());
         }
     }
+
 }

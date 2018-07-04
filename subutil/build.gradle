@@ -1,0 +1,64 @@
+apply plugin: 'com.android.library'
+apply plugin: "maven"
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            consumerProguardFiles 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    testOptions.unitTests.all {
+        testLogging {
+            events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+        }
+    }
+}
+
+dependencies {
+    compileOnly 'com.android.support:appcompat-v7:27.1.1'
+    compileOnly 'com.android.support:design:27.1.1'
+    testImplementation 'junit:junit:4.12'
+    testImplementation "org.robolectric:robolectric:3.4"
+    compileOnly 'com.google.code.gson:gson:2.8.5'
+    compileOnly 'com.github.bumptech.glide:glide:4.7.1'
+}
+
+def URL = 'http://localhost:8081/repository/yq/'
+def NAME = 'admin'
+def PASSWARD='admin123'
+def VERSION = '1.0.0'
+def ARTIFACTID='lib-ax'
+def GROUPID='com.ax.axtools_subutil'
+def PACKAGING='aar'
+def DESCRIPTION='工具库'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: URL) {
+                authentication(userName: NAME, password: PASSWARD)
+            }
+            pom.project {
+                version VERSION
+                artifactId ARTIFACTID
+                groupId GROUPID
+                packaging PACKAGING
+                description DESCRIPTION
+            }
+        }
+    }
+}

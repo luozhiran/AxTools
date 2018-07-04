@@ -659,13 +659,13 @@ public class AxDataTool {
         if (byteNum < 0) {
             return "shouldn't be less than zero!";
         } else if (byteNum < AxConstTool.KB) {
-            return String.format(Locale.getDefault(), "%.3fB", (double) byteNum);
+            return String.format(Locale.getDefault(), "%.2fB", (double) byteNum);
         } else if (byteNum < AxConstTool.MB) {
-            return String.format(Locale.getDefault(), "%.3fKB", (double) byteNum / AxConstTool.KB);
+            return String.format(Locale.getDefault(), "%.2fKB", (double) byteNum / AxConstTool.KB);
         } else if (byteNum < AxConstTool.GB) {
-            return String.format(Locale.getDefault(), "%.3fMB", (double) byteNum / AxConstTool.MB);
+            return String.format(Locale.getDefault(), "%.2fMB", (double) byteNum / AxConstTool.MB);
         } else {
-            return String.format(Locale.getDefault(), "%.3fGB", (double) byteNum / AxConstTool.GB);
+            return String.format(Locale.getDefault(), "%.2fGB", (double) byteNum / AxConstTool.GB);
         }
     }
 

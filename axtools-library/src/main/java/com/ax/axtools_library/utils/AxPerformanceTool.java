@@ -8,21 +8,16 @@ public class AxPerformanceTool {
 
     private static long time;
 
-    public static void initpointTime() {
+
+    public static String start(){
         time = System.currentTimeMillis();
+        return "计时："+time;
     }
 
-
-    public static String intervalTo() {
-        return (System.currentTimeMillis() - time)+"毫秒";
-    }
-
-    public static String intervalBy() {
-        if (time == 0){
-            time = System.currentTimeMillis();
-        }
-        long temp =  System.currentTimeMillis()-time;
+    public static String end(){
+        long diff = System.currentTimeMillis() - time;
         time = System.currentTimeMillis();
-        return temp+"毫秒";
+        return diff+"毫秒";
     }
+
 }

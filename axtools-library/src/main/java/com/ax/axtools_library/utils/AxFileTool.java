@@ -12,11 +12,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
+import android.os.storage.StorageManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.util.Base64;
 import android.util.Log;
+
+import com.ax.axtools_library.module.StorageModel;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -37,6 +40,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -46,9 +51,9 @@ import java.util.Vector;
 
 public class AxFileTool {
 
-
+    private static final String STORAGE_VOLUME_CLASS = "android.os.storage.StorageVolume";
     public static final int BUFSIZE = 1024 * 8;
-    private static final String TAG = "RxFileTool";
+    private static final String TAG = "AxFileTool";
 
     /**
      * 得到SD卡根目录.
@@ -106,6 +111,8 @@ public class AxFileTool {
         if (!isSDCardEnable()) return "sdcard unable!";
         return Environment.getDataDirectory().getPath();
     }
+
+
 
     /**
      * 获取SD卡剩余空间
@@ -354,7 +361,57 @@ public class AxFileTool {
         File newFile = new File(newFilePath);
         return resFile.renameTo(newFile);
     }
+    /**
+     * 获得SD卡总大小
+     *
+     * @return
+     */
+    public static long getSDTotalSize() {
+        File path = Environment.getExternalStorageDirectory();
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = stat.getBlockSize();
+        long totalBlocks = stat.getBlockCount();
+        return blockSize * totalBlocks;
+    }
 
+    /**
+     * 获得扩展SD卡总大小
+     *
+     * @return
+     */
+    public static long getExternalSDTotalSize(String file){
+        File path = new File(file);
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = stat.getBlockSize();
+        long totalBlocks = stat.getBlockCount();
+        return blockSize * totalBlocks;
+    }
+
+    /**
+     * 获得机身内存总大小
+     *
+     * @return
+     */
+    public static long getRomTotalSize() {
+        File path = Environment.getDataDirectory();
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = stat.getBlockSize();
+        long totalBlocks = stat.getBlockCount();
+        return  blockSize * totalBlocks;
+    }
+
+    /**
+     * 获得机身可用内存
+     *
+     * @return
+     */
+    public static long getRomAvailableSize() {
+        File path = Environment.getDataDirectory();
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = stat.getBlockSize();
+        long availableBlocks = stat.getAvailableBlocks();
+        return blockSize * availableBlocks;
+    }
     /**
      * 获取磁盘可用空间.
      */
@@ -390,6 +447,22 @@ public class AxFileTool {
             availableBlocks = stat.getAvailableBlocks();
         }
         return availableBlocks * blockSize;
+    }
+
+    /**
+     * 获取扩展sd卡路径
+     * @param context
+     * @return
+     */
+    public static List<String> getExternalStorageVolume(Context context) {
+        List<StorageModel> volumeLists = getStorageList(context);
+        List<String> list = new ArrayList<>();
+        for (StorageModel volume : volumeLists) {
+            if (volume.isRemovable() && !volume.getPath().equals("/storage/usbotg")) {
+                list.add(volume.getPath());
+            }
+        }
+        return list;
     }
 
     /**
@@ -2128,6 +2201,77 @@ public class AxFileTool {
 
     public static File getDataFile(Context context){
         return  context.getFilesDir();
+    }
+
+    /**
+     * 获取StorageManager
+     */
+    public static StorageManager getStorageManager(Context context) {
+        if (context == null)
+            return null;
+        return (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+    }
+
+    /**
+     * 获取设备存储的挂载点列表
+     *
+     * @param context
+     * @return
+     */
+    public static List<StorageModel> getStorageList(Context context) {
+        List<StorageModel> volumeLists = new ArrayList<StorageModel>();
+        StorageManager mStorageManager = getStorageManager(context);
+        if (mStorageManager == null)
+            return volumeLists;
+        try {
+            Class<?> mStorageVolume = Class.forName(STORAGE_VOLUME_CLASS);
+            Class<StorageManager> clazz = StorageManager.class;
+            Method getPath = mStorageVolume.getMethod("getPath");
+            Method isRemovable = mStorageVolume.getMethod("isRemovable");
+            Method getState = mStorageVolume.getMethod("getState");
+            Method getDescription = mStorageVolume.getMethod("getDescription", Context.class);
+            Method method = clazz.getMethod("getVolumeList");
+            method.setAccessible(true);
+            Object[] invokes = (Object[]) method.invoke(mStorageManager);
+            if (invokes != null) {
+                for (int i = 0; i < invokes.length; i++) {
+                    String path = (String) getPath.invoke(invokes[i]);
+                    String state = (String) getState.invoke(invokes[i]);
+                    boolean removable = (Boolean) isRemovable.invoke(invokes[i]);
+                    String description = (String) getDescription.invoke(invokes[i], context);
+                    StorageModel model = new StorageModel();
+                    model.setPath(path);
+                    model.setState(state);
+                    model.setRemovable(removable);
+                    model.setDescription(description);
+                    volumeLists.add(model);
+                }
+            }
+        } catch (NoSuchMethodException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Log.e(TAG, "[getStorageVolumeList]NoSuchMethod!");
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Log.e(TAG, "[getStorageVolumeList]IllegalAccess!");
+        } catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Log.e(TAG, "[getStorageVolumeList]IllegalArgument!");
+        } catch (InvocationTargetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Log.e(TAG, "[getStorageVolumeList]InvocationTarget!");
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Log.e(TAG, "[getStorageVolumeList]ClassNotFound");
+        }
+        for (StorageModel storageVolumeModel : volumeLists) {
+            Log.d(TAG, "[getStorageVolumeList]volume = " + storageVolumeModel);
+        }
+        return volumeLists;
     }
 
 }
