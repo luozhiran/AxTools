@@ -37,7 +37,6 @@ public class AxCrashTool {
 
     static {
 
-
         CRASH_HEAD = "\n************* Crash Log Head ****************" +
                 "\nDevice Manufacturer: " + Build.MANUFACTURER +// 设备厂商
                 "\nDevice Model       : " + Build.MODEL +// 设备型号
@@ -184,5 +183,9 @@ public class AxCrashTool {
             }
         }
         return true;
+    }
+
+    public void uploadCrashLog(){
+
     }
 }
