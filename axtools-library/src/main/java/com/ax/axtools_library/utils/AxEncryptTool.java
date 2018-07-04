@@ -61,7 +61,7 @@ public class AxEncryptTool {
      * @return 16进制密文
      */
     public static String encryptMD2ToString(byte[] data) {
-        return AxDataTool.bytes2HexString(encryptMD2(data));
+        return AxConvertTool.bytes2HexString(encryptMD2(data));
     }
 
     /**
@@ -92,7 +92,7 @@ public class AxEncryptTool {
      * @return 16进制加盐密文
      */
     public static String encryptMD5ToString(String data, String salt) {
-        return  AxDataTool.bytes2HexString(encryptMD5((data + salt).getBytes()));
+        return  AxConvertTool.bytes2HexString(encryptMD5((data + salt).getBytes()));
     }
 
     /**
@@ -102,7 +102,7 @@ public class AxEncryptTool {
      * @return 16进制密文
      */
     public static String encryptMD5ToString(byte[] data) {
-        return  AxDataTool.bytes2HexString(encryptMD5(data));
+        return  AxConvertTool.bytes2HexString(encryptMD5(data));
     }
 
     /**
@@ -116,7 +116,7 @@ public class AxEncryptTool {
         byte[] dataSalt = new byte[data.length + salt.length];
         System.arraycopy(data, 0, dataSalt, 0, data.length);
         System.arraycopy(salt, 0, dataSalt, data.length, salt.length);
-        return  AxDataTool.bytes2HexString(encryptMD5(dataSalt));
+        return  AxConvertTool.bytes2HexString(encryptMD5(dataSalt));
     }
 
     /**
@@ -156,7 +156,7 @@ public class AxEncryptTool {
      * @return 文件的16进制密文
      */
     public static String encryptMD5File2String(File file) {
-        return encryptMD5File(file) != null ?  AxDataTool.bytes2HexString(encryptMD5File(file)) : "";
+        return encryptMD5File(file) != null ?  AxConvertTool.bytes2HexString(encryptMD5File(file)) : "";
     }
 
     /**
@@ -177,7 +177,7 @@ public class AxEncryptTool {
         } catch (NoSuchAlgorithmException | IOException e) {
             e.printStackTrace();
         } finally {
-            AxFileTool.closeIO(fis);
+            AxCloseIOTool.closeIO(fis);
         }
         return null;
     }
@@ -199,7 +199,7 @@ public class AxEncryptTool {
      * @return 16进制密文
      */
     public static String encryptSHA1ToString(byte[] data) {
-        return  AxDataTool.bytes2HexString(encryptSHA1(data));
+        return  AxConvertTool.bytes2HexString(encryptSHA1(data));
     }
 
     /**
@@ -229,7 +229,7 @@ public class AxEncryptTool {
      * @return 16进制密文
      */
     public static String encryptSHA224ToString(byte[] data) {
-        return  AxDataTool.bytes2HexString(encryptSHA224(data));
+        return  AxConvertTool.bytes2HexString(encryptSHA224(data));
     }
 
     /**
@@ -259,7 +259,7 @@ public class AxEncryptTool {
      * @return 16进制密文
      */
     public static String encryptSHA256ToString(byte[] data) {
-        return  AxDataTool.bytes2HexString(encryptSHA256(data));
+        return  AxConvertTool.bytes2HexString(encryptSHA256(data));
     }
 
     /**
@@ -291,7 +291,7 @@ public class AxEncryptTool {
      * @return 16进制密文
      */
     public static String encryptSHA384ToString(byte[] data) {
-        return  AxDataTool.bytes2HexString(encryptSHA384(data));
+        return  AxConvertTool.bytes2HexString(encryptSHA384(data));
     }
 
     /**
@@ -321,7 +321,7 @@ public class AxEncryptTool {
      * @return 16进制密文
      */
     public static String encryptSHA512ToString(byte[] data) {
-        return  AxDataTool.bytes2HexString(encryptSHA512(data));
+        return  AxConvertTool.bytes2HexString(encryptSHA512(data));
     }
 
     /**
@@ -392,7 +392,7 @@ public class AxEncryptTool {
      * @return 16进制密文
      */
     public static String encryptDES2HexString(byte[] data, byte[] key) {
-        return  AxDataTool.bytes2HexString(encryptDES(data, key));
+        return  AxConvertTool.bytes2HexString(encryptDES(data, key));
     }
 
     /************************ 3DES加密相关 ***********************/
@@ -427,7 +427,7 @@ public class AxEncryptTool {
      * @return 明文
      */
     public static byte[] decryptHexStringDES(String data, byte[] key) {
-        return decryptDES(AxDataTool.hexString2Bytes(data), key);
+        return decryptDES(AxConvertTool.hexString2Bytes(data), key);
     }
 
     /**
@@ -460,7 +460,7 @@ public class AxEncryptTool {
      * @return 16进制密文
      */
     public static String encrypt3DES2HexString(byte[] data, byte[] key) {
-        return AxDataTool.bytes2HexString(encrypt3DES(data, key));
+        return AxConvertTool.bytes2HexString(encrypt3DES(data, key));
     }
 
     /**
@@ -495,7 +495,7 @@ public class AxEncryptTool {
      * @return 明文
      */
     public static byte[] decryptHexString3DES(String data, byte[] key) {
-        return decrypt3DES(AxDataTool.hexString2Bytes(data), key);
+        return decrypt3DES(AxConvertTool.hexString2Bytes(data), key);
     }
 
     /**
@@ -528,7 +528,7 @@ public class AxEncryptTool {
      * @return 16进制密文
      */
     public static String encryptAES2HexString(byte[] data, byte[] key) {
-        return AxDataTool.bytes2HexString(encryptAES(data, key));
+        return AxConvertTool.bytes2HexString(encryptAES(data, key));
     }
 
     /**
@@ -561,7 +561,7 @@ public class AxEncryptTool {
      * @return 明文
      */
     public static byte[] decryptHexStringAES(String data, byte[] key) {
-        return decryptAES(AxDataTool.hexString2Bytes(data), key);
+        return decryptAES(AxConvertTool.hexString2Bytes(data), key);
     }
 
     /**

@@ -140,7 +140,7 @@ public class AxCrashTool {
             PackageInfo packageInfo = packageManager.getPackageInfo(mContext.getPackageName(), 0);
             int labelRes = packageInfo.applicationInfo.labelRes;
             String name = mContext.getResources().getString(labelRes);
-            mCrashDirPath = AxFileTool.getRootPath() + File.separator + name + File.separator + "crash" + File.separator;
+            mCrashDirPath = AxPathTool.getRootPath() + File.separator + name + File.separator + "crash" + File.separator;
         } catch (Exception e) {
             if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
                 mCrashDirPath = mContext.getExternalCacheDir().getPath() + File.separator + "crash" + File.separator;

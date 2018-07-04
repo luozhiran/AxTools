@@ -367,7 +367,7 @@ public class AxImageTool {
             e.printStackTrace();
             return null;
         } finally {
-            AxFileTool.closeIO(is);
+            AxCloseIOTool.closeIO(is);
         }
     }
 
@@ -394,7 +394,7 @@ public class AxImageTool {
             e.printStackTrace();
             return null;
         } finally {
-            AxFileTool.closeIO(is);
+            AxCloseIOTool.closeIO(is);
         }
     }
 
@@ -405,7 +405,7 @@ public class AxImageTool {
      * @return bitmap
      */
     public static Bitmap getBitmap(String filePath) {
-        if (AxDataTool.isNullString(filePath)) return null;
+        if (AxStatusTool.isNullString(filePath)) return null;
         return BitmapFactory.decodeFile(filePath);
     }
 
@@ -418,7 +418,7 @@ public class AxImageTool {
      * @return bitmap
      */
     public static Bitmap getBitmap(String filePath, int maxWidth, int maxHeight) {
-        if (AxDataTool.isNullString(filePath)) return null;
+        if (AxStatusTool.isNullString(filePath)) return null;
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filePath, options);
@@ -1404,7 +1404,7 @@ public class AxImageTool {
      * @return {@code true}: 成功<br>{@code false}: 失败
      */
     public static boolean save(Bitmap src, String filePath, Bitmap.CompressFormat format) {
-        return save(src, AxFileTool.getFileByPath(filePath), format, false);
+        return save(src, AxPathTool.getFileByPath(filePath), format, false);
     }
 
     /**
@@ -1429,7 +1429,7 @@ public class AxImageTool {
      * @return {@code true}: 成功<br>{@code false}: 失败
      */
     public static boolean save(Bitmap src, String filePath, Bitmap.CompressFormat format, boolean recycle) {
-        return save(src, AxFileTool.getFileByPath(filePath), format, recycle);
+        return save(src, AxPathTool.getFileByPath(filePath), format, recycle);
     }
 
     /**
@@ -1442,7 +1442,7 @@ public class AxImageTool {
      * @return {@code true}: 成功<br>{@code false}: 失败
      */
     public static boolean save(Bitmap src, File file, Bitmap.CompressFormat format, boolean recycle) {
-        if (isEmptyBitmap(src) || !AxFileTool.createOrExistsFile(file)) return false;
+        if (isEmptyBitmap(src) || !AxFileIOTool.createOrExistsFile(file)) return false;
         System.out.println(src.getWidth() + ", " + src.getHeight());
         OutputStream os = null;
         boolean ret = false;
@@ -1453,7 +1453,7 @@ public class AxImageTool {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            AxFileTool.closeIO(os);
+            AxCloseIOTool.closeIO(os);
         }
         return ret;
     }
@@ -1488,7 +1488,7 @@ public class AxImageTool {
      * @return 图片类型
      */
     public static String getImageType(String filePath) {
-        return getImageType(AxFileTool.getFileByPath(filePath));
+        return getImageType(AxPathTool.getFileByPath(filePath));
     }
 
     /**
@@ -1507,7 +1507,7 @@ public class AxImageTool {
             e.printStackTrace();
             return null;
         } finally {
-            AxFileTool.closeIO(is);
+            AxCloseIOTool.closeIO(is);
         }
     }
 

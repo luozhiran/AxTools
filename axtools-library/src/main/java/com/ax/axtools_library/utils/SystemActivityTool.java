@@ -5,7 +5,23 @@ import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 
-public class AxSettingTools {
+public class SystemActivityTool {
+
+    /**
+     * 跳转到系统蓝牙界面
+     */
+    public static void gotoSystemSettingBLUETOOTH(Context context){
+        Intent intent =  new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
+        AxLaunchTool.skipActivity(context,intent);
+    }
+
+    /**
+     * 跳转到系统时间界面
+     */
+    public static void gotoSystemSettingTime(Context context){
+        Intent intent =  new Intent(Settings.ACTION_DATE_SETTINGS);
+        AxLaunchTool.skipActivity(context,intent);
+    }
 
     public static void enterWhiteListSetting(Context context){
         try {

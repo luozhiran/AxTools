@@ -183,7 +183,7 @@ public class AxPictureTool {
                 }
             }
         }
-        return AxDataTool.isNullString(path) ? originalUri.getPath() : null;
+        return AxStatusTool.isNullString(path) ? originalUri.getPath() : null;
     }
 
     /**

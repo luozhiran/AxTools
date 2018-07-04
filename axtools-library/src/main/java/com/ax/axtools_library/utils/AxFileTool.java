@@ -51,94 +51,7 @@ import java.util.Vector;
 
 public class AxFileTool {
 
-    private static final String STORAGE_VOLUME_CLASS = "android.os.storage.StorageVolume";
     public static final int BUFSIZE = 1024 * 8;
-    private static final String TAG = "AxFileTool";
-
-    /**
-     * 得到SD卡根目录.
-     */
-    public static File getRootPath() {
-        File path = null;
-        if (sdCardIsAvailable()) {
-            path = Environment.getExternalStorageDirectory(); // 取得sdcard文件路径
-        } else {
-            path = Environment.getDataDirectory();
-        }
-        return path;
-    }
-
-    /**
-     * 获取的目录默认没有最后的”/”,需要自己加上
-     * 获取本应用图片缓存目录
-     *
-     * @return
-     */
-    public static File getCecheFolder(Context context) {
-        File folder = new File(context.getCacheDir(), "IMAGECACHE");
-        if (!folder.exists()) {
-            folder.mkdir();
-        }
-        return folder;
-    }
-
-    /**
-     * 判断SD卡是否可用
-     *
-     * @return true : 可用<br>false : 不可用
-     */
-    public static boolean isSDCardEnable() {
-        return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
-    }
-
-    /**
-     * 获取SD卡路径
-     * <p>一般是/storage/emulated/0/</p>
-     *
-     * @return SD卡路径
-     */
-    public static String getSDCardPath() {
-        if (!isSDCardEnable()) return "sdcard unable!";
-        return Environment.getExternalStorageDirectory().getPath() + File.separator;
-    }
-
-    /**
-     * 获取SD卡Data路径
-     *
-     * @return SD卡Data路径
-     */
-    public static String getDataPath() {
-        if (!isSDCardEnable()) return "sdcard unable!";
-        return Environment.getDataDirectory().getPath();
-    }
-
-
-
-    /**
-     * 获取SD卡剩余空间
-     *
-     * @return SD卡剩余空间
-     */
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    public static String getFreeSpace() {
-        if (!isSDCardEnable()) return "sdcard unable!";
-        StatFs stat = new StatFs(getSDCardPath());
-        long blockSize, availableBlocks;
-        availableBlocks = stat.getAvailableBlocksLong();
-        blockSize = stat.getBlockSizeLong();
-        return AxDataTool.byte2FitSize(availableBlocks * blockSize);
-    }
-
-    /**
-     * SD卡是否可用.
-     */
-    public static boolean sdCardIsAvailable() {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            File sd = new File(Environment.getExternalStorageDirectory().getPath());
-            return sd.canWrite();
-        } else
-            return false;
-    }
 
     /**
      * 文件或者文件夹是否存在.
@@ -148,149 +61,7 @@ public class AxFileTool {
         return file.exists();
     }
 
-    /**
-     * 删除指定文件夹下所有文件, 不保留文件夹.
-     */
-    public static boolean delAllFile(String path) {
-        boolean flag = false;
-        File file = new File(path);
-        if (!file.exists()) {
-            return flag;
-        }
-        if (file.isFile()) {
-            file.delete();
-            return true;
-        }
-        File[] files = file.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            File exeFile = files[i];
-            if (exeFile.isDirectory()) {
-                delAllFile(exeFile.getAbsolutePath());
-            } else {
-                exeFile.delete();
-            }
-        }
-        file.delete();
 
-        return flag;
-    }
-
-    /**
-     * 删除目录下的所有文件
-     *
-     * @param dirPath 目录路径
-     * @return {@code true}: 删除成功<br>{@code false}: 删除失败
-     */
-    public static boolean deleteFilesInDir(String dirPath) {
-        return deleteFilesInDir(getFileByPath(dirPath));
-    }
-
-    /**
-     * 删除目录下的所有文件
-     *
-     * @param dir 目录
-     * @return {@code true}: 删除成功<br>{@code false}: 删除失败
-     */
-    public static boolean deleteFilesInDir(File dir) {
-        if (dir == null) return false;
-        // 目录不存在返回true
-        if (!dir.exists()) return true;
-        // 不是目录返回false
-        if (!dir.isDirectory()) return false;
-        // 现在文件存在且是文件夹
-        File[] files = dir.listFiles();
-        if (files != null && files.length != 0) {
-            for (File file : files) {
-                if (file.isFile()) {
-                    if (!deleteFile(file)) return false;
-                } else if (file.isDirectory()) {
-                    if (!deleteDir(file)) return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * 清除内部缓存
-     * <p>/data/data/com.xxx.xxx/cache</p>
-     *
-     * @return {@code true}: 清除成功<br>{@code false}: 清除失败
-     */
-    public static boolean cleanInternalCache(Context context) {
-        return AxFileTool.deleteFilesInDir(context.getCacheDir());
-    }
-
-    /**
-     * 清除内部文件
-     * <p>/data/data/com.xxx.xxx/files</p>
-     *
-     * @return {@code true}: 清除成功<br>{@code false}: 清除失败
-     */
-    public static boolean cleanInternalFiles(Context context) {
-        return AxFileTool.deleteFilesInDir(context.getFilesDir());
-    }
-
-    /**
-     * 清除内部数据库
-     * <p>/data/data/com.xxx.xxx/databases</p>
-     *
-     * @return {@code true}: 清除成功<br>{@code false}: 清除失败
-     */
-    public static boolean cleanInternalDbs(Context context) {
-        return AxFileTool.deleteFilesInDir(context.getFilesDir().getParent() + File.separator + "databases");
-    }
-
-    /**
-     * 根据名称清除数据库
-     * <p>/data/data/com.xxx.xxx/databases/dbName</p>
-     *
-     * @param dbName 数据库名称
-     * @return {@code true}: 清除成功<br>{@code false}: 清除失败
-     */
-    public static boolean cleanInternalDbByName(Context context, String dbName) {
-        return context.deleteDatabase(dbName);
-    }
-
-    /**
-     * 清除内部SP
-     * <p>/data/data/com.xxx.xxx/shared_prefs</p>
-     *
-     * @return {@code true}: 清除成功<br>{@code false}: 清除失败
-     */
-    public static boolean cleanInternalSP(Context context) {
-        return AxFileTool.deleteFilesInDir(context.getFilesDir().getParent() + File.separator + "shared_prefs");
-    }
-
-    /**
-     * 清除外部缓存
-     * <p>/storage/emulated/0/android/data/com.xxx.xxx/cache</p>
-     *
-     * @return {@code true}: 清除成功<br>{@code false}: 清除失败
-     */
-    public static boolean cleanExternalCache(Context context) {
-        return AxFileTool.isSDCardEnable() && AxFileTool.deleteFilesInDir(context.getExternalCacheDir());
-    }
-
-    /**
-     * 清除自定义目录下的文件
-     *
-     * @param dirPath 目录路径
-     * @return {@code true}: 清除成功<br>{@code false}: 清除失败
-     */
-    public static boolean cleanCustomCache(String dirPath) {
-        return AxFileTool.deleteFilesInDir(dirPath);
-    }
-
-    /**
-     * 清除自定义目录下的文件
-     *
-     * @param dir 目录
-     * @return {@code true}: 清除成功<br>{@code false}: 清除失败
-     */
-    public static boolean cleanCustomCache(File dir) {
-        return AxFileTool.deleteFilesInDir(dir);
-    }
 
     /**
      * 文件复制.
@@ -361,109 +132,8 @@ public class AxFileTool {
         File newFile = new File(newFilePath);
         return resFile.renameTo(newFile);
     }
-    /**
-     * 获得SD卡总大小
-     *
-     * @return
-     */
-    public static long getSDTotalSize() {
-        File path = Environment.getExternalStorageDirectory();
-        StatFs stat = new StatFs(path.getPath());
-        long blockSize = stat.getBlockSize();
-        long totalBlocks = stat.getBlockCount();
-        return blockSize * totalBlocks;
-    }
 
-    /**
-     * 获得扩展SD卡总大小
-     *
-     * @return
-     */
-    public static long getExternalSDTotalSize(String file){
-        File path = new File(file);
-        StatFs stat = new StatFs(path.getPath());
-        long blockSize = stat.getBlockSize();
-        long totalBlocks = stat.getBlockCount();
-        return blockSize * totalBlocks;
-    }
 
-    /**
-     * 获得机身内存总大小
-     *
-     * @return
-     */
-    public static long getRomTotalSize() {
-        File path = Environment.getDataDirectory();
-        StatFs stat = new StatFs(path.getPath());
-        long blockSize = stat.getBlockSize();
-        long totalBlocks = stat.getBlockCount();
-        return  blockSize * totalBlocks;
-    }
-
-    /**
-     * 获得机身可用内存
-     *
-     * @return
-     */
-    public static long getRomAvailableSize() {
-        File path = Environment.getDataDirectory();
-        StatFs stat = new StatFs(path.getPath());
-        long blockSize = stat.getBlockSize();
-        long availableBlocks = stat.getAvailableBlocks();
-        return blockSize * availableBlocks;
-    }
-    /**
-     * 获取磁盘可用空间.
-     */
-    @SuppressWarnings("deprecation")
-    @SuppressLint("NewApi")
-    public static long getSDCardAvailaleSize() {
-        File path = getRootPath();
-        StatFs stat = new StatFs(path.getPath());
-        long blockSize, availableBlocks;
-        if (Build.VERSION.SDK_INT >= 18) {
-            blockSize = stat.getBlockSizeLong();
-            availableBlocks = stat.getAvailableBlocksLong();
-        } else {
-            blockSize = stat.getBlockSize();
-            availableBlocks = stat.getAvailableBlocks();
-        }
-        return availableBlocks * blockSize;
-    }
-
-    /**
-     * 获取某个目录可用大小.
-     */
-    @SuppressLint("NewApi")
-    @SuppressWarnings("deprecation")
-    public static long getDirSize(String path) {
-        StatFs stat = new StatFs(path);
-        long blockSize, availableBlocks;
-        if (Build.VERSION.SDK_INT >= 18) {
-            blockSize = stat.getBlockSizeLong();
-            availableBlocks = stat.getAvailableBlocksLong();
-        } else {
-            blockSize = stat.getBlockSize();
-            availableBlocks = stat.getAvailableBlocks();
-        }
-        return availableBlocks * blockSize;
-    }
-
-    /**
-     * 获取扩展sd卡路径
-     * @param context
-     * @return
-     */
-    public static List<String> getExternalStorageVolume(Context context) {
-        List<StorageModel> volumeLists = getStorageList(context);
-        List<String> list = new ArrayList<>();
-        for (StorageModel volume : volumeLists) {
-            if (volume.isRemovable() && !volume.getPath().equals("/storage/usbotg")) {
-                list.add(volume.getPath());
-            }
-        }
-        return list;
-    }
 
     /**
      * 获取文件或者文件夹大小.
@@ -617,38 +287,6 @@ public class AxFileTool {
         return intent;
     }
 
-    /**
-     * 获取缓存目录
-     *
-     * @param context
-     * @return
-     */
-    public static String getDiskCacheDir(Context context) {
-        String cachePath = null;
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
-                || !Environment.isExternalStorageRemovable()) {
-            cachePath = context.getExternalCacheDir().getPath();
-        } else {
-            cachePath = context.getCacheDir().getPath();
-        }
-        return cachePath;
-    }
-
-    /**
-     * 获取缓存视频文件目录
-     *
-     * @param context
-     * @return
-     */
-    public static String getDiskFileDir(Context context) {
-        String cachePath = null;
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) || !Environment.isExternalStorageRemovable()) {
-            cachePath = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES).getPath();
-        } else {
-            cachePath = context.getFilesDir().getPath();
-        }
-        return cachePath;
-    }
 
     /**
      * 多个文件合并
@@ -670,7 +308,6 @@ public class AxFileTool {
                 }
                 fc.close();
             }
-            Log.d(TAG, "拼接完成");
         } catch (IOException ioe) {
             ioe.printStackTrace();
         } finally {
@@ -713,7 +350,7 @@ public class AxFileTool {
                 }
             }
             in.close();
-            write(file.getAbsolutePath(), buf.toString());
+            AxFileIOTool.write(file.getAbsolutePath(), buf.toString());
             Log.d("ts替换", "ts替换完成");
         } catch (FileNotFoundException e1) {
             e1.printStackTrace();
@@ -723,33 +360,6 @@ public class AxFileTool {
         return buf.toString();
     }
 
-    /**
-     * 将字符串 保存成 文件
-     *
-     * @param filePath
-     * @param content
-     */
-    public static void write(String filePath, String content) {
-        BufferedWriter bw = null;
-        try {
-            //根据文件路径创建缓冲输出流
-            bw = new BufferedWriter(new FileWriter(filePath));
-            // 将内容写入文件中
-            bw.write(content);
-//            Log.d("M3U8替换", "替换完成");
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            // 关闭流
-            if (bw != null) {
-                try {
-                    bw.close();
-                } catch (IOException e) {
-                    bw = null;
-                }
-            }
-        }
-    }
 
     /**
      * 获取 搜索的路径 下的 所有 后缀 的文件
@@ -776,384 +386,7 @@ public class AxFileTool {
     }
 
 
-    //----------------------------------------------------------------------------------------------
 
-    /**
-     * 根据文件路径获取文件
-     *
-     * @param filePath 文件路径
-     * @return 文件
-     */
-    public static File getFileByPath(String filePath) {
-        return AxDataTool.isNullString(filePath) ? null : new File(filePath);
-    }
-    //==============================================================================================
-
-    /**
-     * 判断文件是否存在
-     *
-     * @param filePath 文件路径
-     * @return {@code true}: 存在<br>{@code false}: 不存在
-     */
-    public static boolean isFileExists(String filePath) {
-        return isFileExists(getFileByPath(filePath));
-    }
-
-    /**
-     * 判断文件是否存在
-     *
-     * @param file 文件
-     * @return {@code true}: 存在<br>{@code false}: 不存在
-     */
-    public static boolean isFileExists(File file) {
-        return file != null && file.exists();
-    }
-
-    /**
-     * 判断是否是目录
-     *
-     * @param dirPath 目录路径
-     * @return {@code true}: 是<br>{@code false}: 否
-     */
-    public static boolean isDir(String dirPath) {
-        return isDir(getFileByPath(dirPath));
-    }
-
-    /**
-     * 判断是否是目录
-     *
-     * @param file 文件
-     * @return {@code true}: 是<br>{@code false}: 否
-     */
-    public static boolean isDir(File file) {
-        return isFileExists(file) && file.isDirectory();
-    }
-
-    /**
-     * 判断是否是文件
-     *
-     * @param filePath 文件路径
-     * @return {@code true}: 是<br>{@code false}: 否
-     */
-    public static boolean isFile(String filePath) {
-        return isFile(getFileByPath(filePath));
-    }
-
-    /**
-     * 判断是否是文件
-     *
-     * @param file 文件
-     * @return {@code true}: 是<br>{@code false}: 否
-     */
-    public static boolean isFile(File file) {
-        return isFileExists(file) && file.isFile();
-    }
-
-    /**
-     * 判断目录是否存在，不存在则判断是否创建成功
-     *
-     * @param dirPath 文件路径
-     * @return {@code true}: 存在或创建成功<br>{@code false}: 不存在或创建失败
-     */
-    public static boolean createOrExistsDir(String dirPath) {
-        return createOrExistsDir(getFileByPath(dirPath));
-    }
-
-    /**
-     * 判断目录是否存在，不存在则判断是否创建成功
-     *
-     * @param file 文件
-     * @return {@code true}: 存在或创建成功<br>{@code false}: 不存在或创建失败
-     */
-    public static boolean createOrExistsDir(File file) {
-        // 如果存在，是目录则返回true，是文件则返回false，不存在则返回是否创建成功
-        return file != null && (file.exists() ? file.isDirectory() : file.mkdirs());
-    }
-
-    /**
-     * 判断文件是否存在，不存在则判断是否创建成功
-     *
-     * @param filePath 文件路径
-     * @return {@code true}: 存在或创建成功<br>{@code false}: 不存在或创建失败
-     */
-    public static boolean createOrExistsFile(String filePath) {
-        return createOrExistsFile(getFileByPath(filePath));
-    }
-
-    /**
-     * 判断文件是否存在，不存在则判断是否创建成功
-     *
-     * @param file 文件
-     * @return {@code true}: 存在或创建成功<br>{@code false}: 不存在或创建失败
-     */
-    public static boolean createOrExistsFile(File file) {
-        if (file == null) return false;
-        // 如果存在，是文件则返回true，是目录则返回false
-        if (file.exists()) return file.isFile();
-        if (!createOrExistsDir(file.getParentFile())) return false;
-        try {
-            return file.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * 判断文件是否存在，存在则在创建之前删除
-     *
-     * @param filePath 文件路径
-     * @return {@code true}: 创建成功<br>{@code false}: 创建失败
-     */
-    public static boolean createFileByDeleteOldFile(String filePath) {
-        return createFileByDeleteOldFile(getFileByPath(filePath));
-    }
-
-    /**
-     * 判断文件是否存在，存在则在创建之前删除
-     *
-     * @param file 文件
-     * @return {@code true}: 创建成功<br>{@code false}: 创建失败
-     */
-    public static boolean createFileByDeleteOldFile(File file) {
-        if (file == null) return false;
-        // 文件存在并且删除失败返回false
-        if (file.exists() && file.isFile() && !file.delete()) return false;
-        // 创建目录失败返回false
-        if (!createOrExistsDir(file.getParentFile())) return false;
-        try {
-            return file.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * 复制或移动目录
-     *
-     * @param srcDirPath  源目录路径
-     * @param destDirPath 目标目录路径
-     * @param isMove      是否移动
-     * @return {@code true}: 复制或移动成功<br>{@code false}: 复制或移动失败
-     */
-    public static boolean copyOrMoveDir(String srcDirPath, String destDirPath, boolean isMove) {
-        return copyOrMoveDir(getFileByPath(srcDirPath), getFileByPath(destDirPath), isMove);
-    }
-
-    /**
-     * 复制或移动目录
-     *
-     * @param srcDir  源目录
-     * @param destDir 目标目录
-     * @param isMove  是否移动
-     * @return {@code true}: 复制或移动成功<br>{@code false}: 复制或移动失败
-     */
-    public static boolean copyOrMoveDir(File srcDir, File destDir, boolean isMove) {
-        if (srcDir == null || destDir == null) return false;
-        // 如果目标目录在源目录中则返回false，看不懂的话好好想想递归怎么结束
-        // srcPath : F:\\MyGithub\\AndroidUtilCode\\utilcode\\src\\test\\res
-        // destPath: F:\\MyGithub\\AndroidUtilCode\\utilcode\\src\\test\\res1
-        // 为防止以上这种情况出现出现误判，须分别在后面加个路径分隔符
-        String srcPath = srcDir.getPath() + File.separator;
-        String destPath = destDir.getPath() + File.separator;
-        if (destPath.contains(srcPath)) return false;
-        // 源文件不存在或者不是目录则返回false
-        if (!srcDir.exists() || !srcDir.isDirectory()) return false;
-        // 目标目录不存在返回false
-        if (!createOrExistsDir(destDir)) return false;
-        File[] files = srcDir.listFiles();
-        for (File file : files) {
-            File oneDestFile = new File(destPath + file.getName());
-            if (file.isFile()) {
-                // 如果操作失败返回false
-                if (!copyOrMoveFile(file, oneDestFile, isMove)) return false;
-            } else if (file.isDirectory()) {
-                // 如果操作失败返回false
-                if (!copyOrMoveDir(file, oneDestFile, isMove)) return false;
-            }
-        }
-        return !isMove || deleteDir(srcDir);
-    }
-
-    /**
-     * 复制或移动文件
-     *
-     * @param srcFilePath  源文件路径
-     * @param destFilePath 目标文件路径
-     * @param isMove       是否移动
-     * @return {@code true}: 复制或移动成功<br>{@code false}: 复制或移动失败
-     */
-    public static boolean copyOrMoveFile(String srcFilePath, String destFilePath, boolean isMove) {
-        return copyOrMoveFile(getFileByPath(srcFilePath), getFileByPath(destFilePath), isMove);
-    }
-
-    /**
-     * 复制或移动文件
-     *
-     * @param srcFile  源文件
-     * @param destFile 目标文件
-     * @param isMove   是否移动
-     * @return {@code true}: 复制或移动成功<br>{@code false}: 复制或移动失败
-     */
-    public static boolean copyOrMoveFile(File srcFile, File destFile, boolean isMove) {
-        if (srcFile == null || destFile == null) return false;
-        // 源文件不存在或者不是文件则返回false
-        if (!srcFile.exists() || !srcFile.isFile()) return false;
-        // 目标文件存在且是文件则返回false
-        if (destFile.exists() && destFile.isFile()) return false;
-        // 目标目录不存在返回false
-        if (!createOrExistsDir(destFile.getParentFile())) return false;
-        try {
-            return writeFileFromIS(destFile, new FileInputStream(srcFile), false)
-                    && !(isMove && !deleteFile(srcFile));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * 复制目录
-     *
-     * @param srcDirPath  源目录路径
-     * @param destDirPath 目标目录路径
-     * @return {@code true}: 复制成功<br>{@code false}: 复制失败
-     */
-    public static boolean copyDir(String srcDirPath, String destDirPath) {
-        return copyDir(getFileByPath(srcDirPath), getFileByPath(destDirPath));
-    }
-
-    /**
-     * 复制目录
-     *
-     * @param srcDir  源目录
-     * @param destDir 目标目录
-     * @return {@code true}: 复制成功<br>{@code false}: 复制失败
-     */
-    public static boolean copyDir(File srcDir, File destDir) {
-        return copyOrMoveDir(srcDir, destDir, false);
-    }
-
-    /**
-     * 复制文件
-     *
-     * @param srcFilePath  源文件路径
-     * @param destFilePath 目标文件路径
-     * @return {@code true}: 复制成功<br>{@code false}: 复制失败
-     */
-    public static boolean copyFile(String srcFilePath, String destFilePath) {
-        return copyFile(getFileByPath(srcFilePath), getFileByPath(destFilePath), false);
-    }
-
-    /**
-     * 复制文件
-     *
-     * @param srcFile  源文件
-     * @param destFile 目标文件
-     * @return {@code true}: 复制成功<br>{@code false}: 复制失败
-     */
-    public static boolean copyFile(File srcFile, File destFile, boolean isCopy) {
-        return copyOrMoveFile(srcFile, destFile, false);
-    }
-
-    /**
-     * 移动目录
-     *
-     * @param srcDirPath  源目录路径
-     * @param destDirPath 目标目录路径
-     * @return {@code true}: 移动成功<br>{@code false}: 移动失败
-     */
-    public static boolean moveDir(String srcDirPath, String destDirPath) {
-        return moveDir(getFileByPath(srcDirPath), getFileByPath(destDirPath));
-    }
-
-    /**
-     * 移动目录
-     *
-     * @param srcDir  源目录
-     * @param destDir 目标目录
-     * @return {@code true}: 移动成功<br>{@code false}: 移动失败
-     */
-    public static boolean moveDir(File srcDir, File destDir) {
-        return copyOrMoveDir(srcDir, destDir, true);
-    }
-
-    /**
-     * 移动文件
-     *
-     * @param srcFilePath  源文件路径
-     * @param destFilePath 目标文件路径
-     * @return {@code true}: 移动成功<br>{@code false}: 移动失败
-     */
-    public static boolean moveFile(String srcFilePath, String destFilePath) {
-        return moveFile(getFileByPath(srcFilePath), getFileByPath(destFilePath));
-    }
-
-    /**
-     * 移动文件
-     *
-     * @param srcFile  源文件
-     * @param destFile 目标文件
-     * @return {@code true}: 移动成功<br>{@code false}: 移动失败
-     */
-    public static boolean moveFile(File srcFile, File destFile) {
-        return copyOrMoveFile(srcFile, destFile, true);
-    }
-
-    /**
-     * 删除目录
-     *
-     * @param dirPath 目录路径
-     * @return {@code true}: 删除成功<br>{@code false}: 删除失败
-     */
-    public static boolean deleteDir(String dirPath) {
-        return deleteDir(getFileByPath(dirPath));
-    }
-
-    /**
-     * 删除目录
-     *
-     * @param dir 目录
-     * @return {@code true}: 删除成功<br>{@code false}: 删除失败
-     */
-    public static boolean deleteDir(File dir) {
-        if (dir == null) return false;
-        // 目录不存在返回true
-        if (!dir.exists()) return true;
-        // 不是目录返回false
-        if (!dir.isDirectory()) return false;
-        // 现在文件存在且是文件夹
-        File[] files = dir.listFiles();
-        for (File file : files) {
-            if (file.isFile()) {
-                if (!deleteFile(file)) return false;
-            } else if (file.isDirectory()) {
-                if (!deleteDir(file)) return false;
-            }
-        }
-        return dir.delete();
-    }
-
-    /**
-     * 删除文件
-     *
-     * @param srcFilePath 文件路径
-     * @return {@code true}: 删除成功<br>{@code false}: 删除失败
-     */
-    public static boolean deleteFile(String srcFilePath) {
-        return deleteFile(getFileByPath(srcFilePath));
-    }
-
-    /**
-     * 删除文件
-     *
-     * @param file 文件
-     * @return {@code true}: 删除成功<br>{@code false}: 删除失败
-     */
-    public static boolean deleteFile(File file) {
-        return file != null && (!file.exists() || file.isFile() && file.delete());
-    }
 
     /**
      * 获取目录下所有文件
@@ -1163,7 +396,7 @@ public class AxFileTool {
      * @return 文件链表
      */
     public static List<File> listFilesInDir(String dirPath, boolean isRecursive) {
-        return listFilesInDir(getFileByPath(dirPath), isRecursive);
+        return listFilesInDir(AxPathTool.getFileByPath(dirPath), isRecursive);
     }
 
     /**
@@ -1175,7 +408,7 @@ public class AxFileTool {
      */
     public static List<File> listFilesInDir(File dir, boolean isRecursive) {
         if (isRecursive) return listFilesInDir(dir);
-        if (dir == null || !isDir(dir)) return null;
+        if (dir == null || !AxStatusTool.isDir(dir)) return null;
         List<File> list = new ArrayList<>();
         Collections.addAll(list, dir.listFiles());
         return list;
@@ -1188,7 +421,7 @@ public class AxFileTool {
      * @return 文件链表
      */
     public static List<File> listFilesInDir(String dirPath) {
-        return listFilesInDir(getFileByPath(dirPath));
+        return listFilesInDir(AxPathTool.getFileByPath(dirPath));
     }
 
     /**
@@ -1198,7 +431,7 @@ public class AxFileTool {
      * @return 文件链表
      */
     public static List<File> listFilesInDir(File dir) {
-        if (dir == null || !isDir(dir)) return null;
+        if (dir == null || !AxStatusTool.isDir(dir)) return null;
         List<File> list = new ArrayList<>();
         File[] files = dir.listFiles();
         for (File file : files) {
@@ -1220,7 +453,7 @@ public class AxFileTool {
      * @return 文件链表
      */
     public static List<File> listFilesInDirWithFilter(String dirPath, String suffix, boolean isRecursive) {
-        return listFilesInDirWithFilter(getFileByPath(dirPath), suffix, isRecursive);
+        return listFilesInDirWithFilter(AxPathTool.getFileByPath(dirPath), suffix, isRecursive);
     }
 
     /**
@@ -1234,7 +467,7 @@ public class AxFileTool {
      */
     public static List<File> listFilesInDirWithFilter(File dir, String suffix, boolean isRecursive) {
         if (isRecursive) return listFilesInDirWithFilter(dir, suffix);
-        if (dir == null || !isDir(dir)) return null;
+        if (dir == null || !AxStatusTool.isDir(dir)) return null;
         List<File> list = new ArrayList<>();
         File[] files = dir.listFiles();
         for (File file : files) {
@@ -1254,7 +487,7 @@ public class AxFileTool {
      * @return 文件链表
      */
     public static List<File> listFilesInDirWithFilter(String dirPath, String suffix) {
-        return listFilesInDirWithFilter(getFileByPath(dirPath), suffix);
+        return listFilesInDirWithFilter(AxPathTool.getFileByPath(dirPath), suffix);
     }
 
     /**
@@ -1266,7 +499,7 @@ public class AxFileTool {
      * @return 文件链表
      */
     public static List<File> listFilesInDirWithFilter(File dir, String suffix) {
-        if (dir == null || !isDir(dir)) return null;
+        if (dir == null || !AxStatusTool.isDir(dir)) return null;
         List<File> list = new ArrayList<>();
         File[] files = dir.listFiles();
         for (File file : files) {
@@ -1289,7 +522,7 @@ public class AxFileTool {
      * @return 文件链表
      */
     public static List<File> listFilesInDirWithFilter(String dirPath, FilenameFilter filter, boolean isRecursive) {
-        return listFilesInDirWithFilter(getFileByPath(dirPath), filter, isRecursive);
+        return listFilesInDirWithFilter(AxPathTool.getFileByPath(dirPath), filter, isRecursive);
     }
 
     /**
@@ -1302,7 +535,7 @@ public class AxFileTool {
      */
     public static List<File> listFilesInDirWithFilter(File dir, FilenameFilter filter, boolean isRecursive) {
         if (isRecursive) return listFilesInDirWithFilter(dir, filter);
-        if (dir == null || !isDir(dir)) return null;
+        if (dir == null || !AxStatusTool.isDir(dir)) return null;
         List<File> list = new ArrayList<>();
         File[] files = dir.listFiles();
         for (File file : files) {
@@ -1321,7 +554,7 @@ public class AxFileTool {
      * @return 文件链表
      */
     public static List<File> listFilesInDirWithFilter(String dirPath, FilenameFilter filter) {
-        return listFilesInDirWithFilter(getFileByPath(dirPath), filter);
+        return listFilesInDirWithFilter(AxPathTool.getFileByPath(dirPath), filter);
     }
 
     /**
@@ -1332,7 +565,7 @@ public class AxFileTool {
      * @return 文件链表
      */
     public static List<File> listFilesInDirWithFilter(File dir, FilenameFilter filter) {
-        if (dir == null || !isDir(dir)) return null;
+        if (dir == null || !AxStatusTool.isDir(dir)) return null;
         List<File> list = new ArrayList<>();
         File[] files = dir.listFiles();
         for (File file : files) {
@@ -1355,7 +588,7 @@ public class AxFileTool {
      * @return 文件链表
      */
     public static List<File> searchFileInDir(String dirPath, String fileName) {
-        return searchFileInDir(getFileByPath(dirPath), fileName);
+        return searchFileInDir(AxPathTool.getFileByPath(dirPath), fileName);
     }
 
     /**
@@ -1367,7 +600,7 @@ public class AxFileTool {
      * @return 文件链表
      */
     public static List<File> searchFileInDir(File dir, String fileName) {
-        if (dir == null || !isDir(dir)) return null;
+        if (dir == null || !AxStatusTool.isDir(dir)) return null;
         List<File> list = new ArrayList<>();
         File[] files = dir.listFiles();
         for (File file : files) {
@@ -1381,81 +614,7 @@ public class AxFileTool {
         return list;
     }
 
-    /**
-     * 将输入流写入文件
-     *
-     * @param filePath 路径
-     * @param is       输入流
-     * @param append   是否追加在文件末
-     * @return {@code true}: 写入成功<br>{@code false}: 写入失败
-     */
-    public static boolean writeFileFromIS(String filePath, InputStream is, boolean append) {
-        return writeFileFromIS(getFileByPath(filePath), is, append);
-    }
 
-    /**
-     * 将输入流写入文件
-     *
-     * @param file   文件
-     * @param is     输入流
-     * @param append 是否追加在文件末
-     * @return {@code true}: 写入成功<br>{@code false}: 写入失败
-     */
-    public static boolean writeFileFromIS(File file, InputStream is, boolean append) {
-        if (file == null || is == null) return false;
-        if (!createOrExistsFile(file)) return false;
-        OutputStream os = null;
-        try {
-            os = new BufferedOutputStream(new FileOutputStream(file, append));
-            byte data[] = new byte[AxConstTool.KB];
-            int len;
-            while ((len = is.read(data, 0, AxConstTool.KB)) != -1) {
-                os.write(data, 0, len);
-            }
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            closeIO(is, os);
-        }
-    }
-
-    /**
-     * 将字符串写入文件
-     *
-     * @param filePath 文件路径
-     * @param content  写入内容
-     * @param append   是否追加在文件末
-     * @return {@code true}: 写入成功<br>{@code false}: 写入失败
-     */
-    public static boolean writeFileFromString(String filePath, String content, boolean append) {
-        return writeFileFromString(getFileByPath(filePath), content, append);
-    }
-
-    /**
-     * 将字符串写入文件
-     *
-     * @param file    文件
-     * @param content 写入内容
-     * @param append  是否追加在文件末
-     * @return {@code true}: 写入成功<br>{@code false}: 写入失败
-     */
-    public static boolean writeFileFromString(File file, String content, boolean append) {
-        if (file == null || content == null) return false;
-        if (!createOrExistsFile(file)) return false;
-        FileWriter fileWriter = null;
-        try {
-            fileWriter = new FileWriter(file, append);
-            fileWriter.write(content);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            closeIO(fileWriter);
-        }
-    }
 
     /**
      * 指定编码按行读取文件到List
@@ -1465,7 +624,7 @@ public class AxFileTool {
      * @return 文件行链表
      */
     public static List<String> readFile2List(String filePath, String charsetName) {
-        return readFile2List(getFileByPath(filePath), charsetName);
+        return readFile2List(AxPathTool.getFileByPath(filePath), charsetName);
     }
 
     /**
@@ -1490,7 +649,7 @@ public class AxFileTool {
      */
     public static List<String> readFile2List(String filePath, int st, int end, String
             charsetName) {
-        return readFile2List(getFileByPath(filePath), st, end, charsetName);
+        return readFile2List(AxPathTool.getFileByPath(filePath), st, end, charsetName);
     }
 
     /**
@@ -1525,7 +684,7 @@ public class AxFileTool {
             e.printStackTrace();
             return null;
         } finally {
-            closeIO(reader);
+            AxCloseIOTool.closeIO(reader);
         }
     }
 
@@ -1537,7 +696,7 @@ public class AxFileTool {
      * @return 字符串
      */
     public static String readFile2String(String filePath, String charsetName) {
-        return readFile2String(getFileByPath(filePath), charsetName);
+        return readFile2String(AxPathTool.getFileByPath(filePath), charsetName);
     }
 
     /**
@@ -1567,33 +726,7 @@ public class AxFileTool {
             e.printStackTrace();
             return null;
         } finally {
-            closeIO(reader);
-        }
-    }
-
-    /**
-     * 指定编码按行读取文件到字符数组中
-     *
-     * @param filePath 文件路径
-     * @return StringBuilder对象
-     */
-    public static byte[] readFile2Bytes(String filePath) {
-        return readFile2Bytes(getFileByPath(filePath));
-    }
-
-    /**
-     * 指定编码按行读取文件到字符数组中
-     *
-     * @param file 文件
-     * @return StringBuilder对象
-     */
-    public static byte[] readFile2Bytes(File file) {
-        if (file == null) return null;
-        try {
-            return AxDataTool.inputStream2Bytes(new FileInputStream(file));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
+            AxCloseIOTool.closeIO(reader);
         }
     }
 
@@ -1604,7 +737,7 @@ public class AxFileTool {
      * @return 文件编码
      */
     public static String getFileCharsetSimple(String filePath) {
-        return getFileCharsetSimple(getFileByPath(filePath));
+        return getFileCharsetSimple(AxPathTool.getFileByPath(filePath));
     }
 
     /**
@@ -1622,7 +755,7 @@ public class AxFileTool {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            closeIO(is);
+            AxCloseIOTool.closeIO(is);
         }
         switch (p) {
             case 0xefbb:
@@ -1643,7 +776,7 @@ public class AxFileTool {
      * @return 文件行数
      */
     public static int getFileLines(String filePath) {
-        return getFileLines(getFileByPath(filePath));
+        return getFileLines(AxPathTool.getFileByPath(filePath));
     }
 
     /**
@@ -1667,7 +800,7 @@ public class AxFileTool {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            closeIO(is);
+            AxCloseIOTool.closeIO(is);
         }
         return count;
     }
@@ -1679,7 +812,7 @@ public class AxFileTool {
      * @return 文件大小
      */
     public static String getFileSize(String filePath) {
-        return getFileSize(getFileByPath(filePath));
+        return getFileSize(AxPathTool.getFileByPath(filePath));
     }
 
     /**
@@ -1690,7 +823,7 @@ public class AxFileTool {
      * @return 文件大小
      */
     public static String getFileSize(File file) {
-        if (!isFileExists(file)) return "";
+        if (!AxStatusTool.isFileExists(file)) return "";
         return AxDataTool.byte2FitSize(file.length());
     }
 
@@ -1701,7 +834,7 @@ public class AxFileTool {
      * @return 文件的MD5校验码
      */
     public static String getFileMD5(String filePath) {
-        return getFileMD5(getFileByPath(filePath));
+        return getFileMD5(AxPathTool.getFileByPath(filePath));
     }
 
     /**
@@ -1714,23 +847,7 @@ public class AxFileTool {
         return AxEncryptTool.encryptMD5File2String(file);
     }
 
-    /**
-     * 关闭IO
-     *
-     * @param closeables closeable
-     */
-    public static void closeIO(Closeable... closeables) {
-        if (closeables == null) return;
-        try {
-            for (Closeable closeable : closeables) {
-                if (closeable != null) {
-                    closeable.close();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 
     /**
      * 获取全路径中的最长目录
@@ -2003,22 +1120,7 @@ public class AxFileTool {
         return null;
     }
 
-    /**
-     * 安静关闭IO
-     *
-     * @param closeables closeable
-     */
-    public static void closeIOQuietly(Closeable... closeables) {
-        if (closeables == null) return;
-        for (Closeable closeable : closeables) {
-            if (closeable != null) {
-                try {
-                    closeable.close();
-                } catch (IOException ignored) {
-                }
-            }
-        }
-    }
+
 
     public static String file2Base64(String filePath) {
         FileInputStream fis = null;
@@ -2040,159 +1142,7 @@ public class AxFileTool {
 
     }
 
-    /**
-     * 传入文件名以及字符串, 将字符串信息保存到文件中
-     *
-     * @param strFilePath
-     * @param strBuffer
-     */
-    public static void TextToFile(final String strFilePath, final String strBuffer) {
-        FileWriter fileWriter = null;
-        try {
-            // 创建文件对象
-            File fileText = new File(strFilePath);
-            // 向文件写入对象写入信息
-            fileWriter = new FileWriter(fileText);
-            // 写文件
-            fileWriter.write(strBuffer);
-            // 关闭
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                fileWriter.flush();
-                fileWriter.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
 
-    /**
-     * 以行为单位读取文件，常用于读面向行的格式化文件
-     */
-    public static void readFileByLines(String fileName) {
-        File file = new File(fileName);
-        BufferedReader reader = null;
-        try {
-            System.out.println("以行为单位读取文件内容，一次读一整行：");
-            reader = new BufferedReader(new FileReader(file));
-            String tempString = null;
-            int line = 1;
-            // 一次读入一行，直到读入null为文件结束
-            while ((tempString = reader.readLine()) != null) {
-                // 显示行号
-                System.out.println("line?????????????????????????????????? " + line + ": " + tempString);
-                String content = tempString;
-                line++;
-            }
-
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e1) {
-                }
-            }
-        }
-    }
-
-    /**
-     * 传入文件路径，和内容，然后把内容保存到文件已有内容的后面
-     *
-     * @param content
-     * @param filePath
-     */
-    public static void appendStringToFile(String content, String filePath) {
-        if (!(new File(filePath)).getParentFile().exists()) {
-            (new File(filePath)).getParentFile().mkdirs();
-        }
-        OutputStreamWriter write = null;
-        BufferedWriter writer = null;
-        try {
-            write = new OutputStreamWriter(new FileOutputStream(filePath, true), "utf-8");
-            writer = new BufferedWriter(write);
-            writer.write(content);
-        } catch (IOException var4) {
-            var4.printStackTrace();
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.flush();
-                    writer.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
-
-    }
-
-    /**
-     * 传入文件路径和文件内容，然后用内容覆盖掉文件中原有内容
-     *
-     * @param content
-     * @param filePath
-     */
-    public static void writeStringToFile(String content, String filePath) {
-        if (!(new File(filePath)).getParentFile().exists()) {
-            (new File(filePath)).getParentFile().mkdirs();
-        }
-        OutputStreamWriter write = null;
-        BufferedWriter writer = null;
-        try {
-            write = new OutputStreamWriter(new FileOutputStream(filePath), "utf-8");
-            writer = new BufferedWriter(write);
-            writer.write(content);
-            writer.flush();
-            writer.close();
-        } catch (IOException var4) {
-            if (writer != null) {
-                try {
-                    writer.flush();
-                    writer.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-
-        }
-
-    }
-
-
-    /**
-     * 传入文件路径，读取文件中的内容并返回
-     *
-     * @param path
-     * @return
-     */
-    public static String readStringFromSd(String path) {
-        File file = new File(path);
-        if (file.exists()) {
-            BufferedReader br = null;
-            try {
-                br = new BufferedReader(new FileReader(file));
-                String readline = "";
-                StringBuffer sb = new StringBuffer();
-                while ((readline = br.readLine()) != null) {
-                    sb.append(readline);
-                }
-
-                return sb.toString();
-            } catch (Exception var5) {
-                var5.printStackTrace();
-                return "";
-            } finally {
-                closeIO(br);
-            }
-        } else {
-            return "";
-        }
-    }
 
 
     public static File getDataCacheFile(Context context){
@@ -2203,75 +1153,8 @@ public class AxFileTool {
         return  context.getFilesDir();
     }
 
-    /**
-     * 获取StorageManager
-     */
-    public static StorageManager getStorageManager(Context context) {
-        if (context == null)
-            return null;
-        return (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
-    }
 
-    /**
-     * 获取设备存储的挂载点列表
-     *
-     * @param context
-     * @return
-     */
-    public static List<StorageModel> getStorageList(Context context) {
-        List<StorageModel> volumeLists = new ArrayList<StorageModel>();
-        StorageManager mStorageManager = getStorageManager(context);
-        if (mStorageManager == null)
-            return volumeLists;
-        try {
-            Class<?> mStorageVolume = Class.forName(STORAGE_VOLUME_CLASS);
-            Class<StorageManager> clazz = StorageManager.class;
-            Method getPath = mStorageVolume.getMethod("getPath");
-            Method isRemovable = mStorageVolume.getMethod("isRemovable");
-            Method getState = mStorageVolume.getMethod("getState");
-            Method getDescription = mStorageVolume.getMethod("getDescription", Context.class);
-            Method method = clazz.getMethod("getVolumeList");
-            method.setAccessible(true);
-            Object[] invokes = (Object[]) method.invoke(mStorageManager);
-            if (invokes != null) {
-                for (int i = 0; i < invokes.length; i++) {
-                    String path = (String) getPath.invoke(invokes[i]);
-                    String state = (String) getState.invoke(invokes[i]);
-                    boolean removable = (Boolean) isRemovable.invoke(invokes[i]);
-                    String description = (String) getDescription.invoke(invokes[i], context);
-                    StorageModel model = new StorageModel();
-                    model.setPath(path);
-                    model.setState(state);
-                    model.setRemovable(removable);
-                    model.setDescription(description);
-                    volumeLists.add(model);
-                }
-            }
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            Log.e(TAG, "[getStorageVolumeList]NoSuchMethod!");
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            Log.e(TAG, "[getStorageVolumeList]IllegalAccess!");
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            Log.e(TAG, "[getStorageVolumeList]IllegalArgument!");
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            Log.e(TAG, "[getStorageVolumeList]InvocationTarget!");
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            Log.e(TAG, "[getStorageVolumeList]ClassNotFound");
-        }
-        for (StorageModel storageVolumeModel : volumeLists) {
-            Log.d(TAG, "[getStorageVolumeList]volume = " + storageVolumeModel);
-        }
-        return volumeLists;
-    }
+
+
 
 }
